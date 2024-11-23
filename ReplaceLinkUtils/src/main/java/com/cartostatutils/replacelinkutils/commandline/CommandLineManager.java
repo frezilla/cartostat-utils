@@ -1,5 +1,6 @@
-package com.cartostatutils.replacelinkutils;
+package com.cartostatutils.replacelinkutils.commandline;
 
+import com.cartostatutils.replacelinkutils.ReplaceLinkApp;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -27,8 +28,7 @@ public final class CommandLineManager {
         Option srcDirectory = createOptionsWithArgument("srcdir", "dir", "chemin vers le repertoire à traiter");
         Option codeFile = createOptionsWithArgument("codefile", "file", "chemin vers le fichiers des codes");
         Option outputDirectory = createOptionsWithArgument("outputdir", "dir", "chemin vers le repertoire de sortie");
-        Option logFile = createOptionsWithArgument("logfile", "file", "chemin vers le fichier de log");
-        Option charset = createOptionsWithArgument("charset", "name", "nom du registre des caracteres");
+        Option charset = createOptionsWithArgument("charset", "name", "nom du jeu de caracteres");
 
         options.addOption(help);
         options.addOption(version);
@@ -36,7 +36,6 @@ public final class CommandLineManager {
         options.addOption(srcDirectory);
         options.addOption(codeFile);
         options.addOption(outputDirectory);
-        options.addOption(logFile);
         options.addOption(charset);
         
         parser = new DefaultParser();
@@ -53,7 +52,7 @@ public final class CommandLineManager {
     
     public void displayUsageAndHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(ReplaceLinkUtils.getApp().name, options);
+        formatter.printHelp(ReplaceLinkApp.getApp().getName(), options);
     }
     
     public static CommandLineManager getInstance() {
