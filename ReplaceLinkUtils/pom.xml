@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cartostat-utils</groupId>
     <artifactId>replacelinkutils</artifactId>
-    <description>bla bla bla</description>
+    <description>Valorise les liens de fichier SVG à partir d'un fichier de correspondance des codes</description>
     <name>ReplaceLinkUtils</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -24,6 +24,11 @@
             <version>1.9.0</version>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.18.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.36</version>
@@ -37,5 +42,31 @@
                 <filtering>true</filtering>
             </resource>
         </resources>   
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>
+                                        com.cartostatutils.replacelinkutils.ReplaceLinkApp
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>

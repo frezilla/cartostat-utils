@@ -1,13 +1,19 @@
 package com.cartostatutils.replacelinkutils;
 
 import com.cartostatutils.replacelinkutils.commandline.CommandLineManager;
+import com.cartostatutils.replacelinkutils.processor.Processor;
+import com.cartostatutils.replacelinkutils.processor.ProcessorException;
 import com.cartostatutils.replacelinkutils.properties.AppProperties;
+import java.io.Console;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Properties;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 public final class ReplaceLinkApp {
@@ -26,10 +32,11 @@ public final class ReplaceLinkApp {
         }
     }
     
+    @Getter(AccessLevel.NONE) private final Console console;
     private final String defaultCharset;
     private final String description;
     private final String name;
-    private final PrintStream ps;
+    @Getter(AccessLevel.NONE) private final PrintStream ps;
     private boolean verbose;
     private final String version;
     
@@ -37,6 +44,7 @@ public final class ReplaceLinkApp {
         Properties properties = new Properties();
         properties.load(this.getClass().getClassLoader().getResourceAsStream("app.properties"));
         
+        console = System.console();
         defaultCharset = properties.getProperty("app.defaultCharset");
         description = properties.getProperty("app.description");
         name = properties.getProperty("app.name");
@@ -48,24 +56,57 @@ public final class ReplaceLinkApp {
     public void displayVersion() {
         ps.println(String.format("%s \"%s\"", name, version));
         ps.println(String.format("%10s", description));
-        ps.println(String.format("%10s : %s", "registre des caracteres par defaut", defaultCharset));
+        ps.println(String.format("%10s : %s", "registre des caractères par défaut", defaultCharset));
     }
     
-    public static ReplaceLinkApp getApp() {
+    public static ReplaceLinkApp mainApp() {
         return Holder.INSTANCE;
     }
     
-    public static void main(String[] args) {
+    public PrintWriter getWriter() {
+        if (console == null) {
+            return new PrintWriter(ps);
+        } else {
+            return console.writer();
+        }
+    }
+    
+    public static void main(String[] args) throws InterruptedException {
         try {
-            ReplaceLinkApp.getApp().run(args);
+            ReplaceLinkApp.mainApp().run(args);
         } catch (ParseException e) {
             System.err.println(e);
         }
     }
     
+    public void print(String s) {
+        String string = StringUtils.defaultString(s);
+        
+        if (console == null) {
+            ps.print(string);
+        } else {
+            console.writer().write(string);
+        }
+    }
+    
+    public void println(String s) {
+        print(StringUtils.defaultString(s) + StringUtils.CR);
+    }
+    
+    public void printVerbose(String s) {
+        if (isVerbose()) print(s);
+    }
+    
+    public void printlnVerbose(String s) {
+        if (isVerbose()) println(s);
+    }
+    
+    
     public void run(String[] args) throws ParseException {
         CommandLine commandLine = CommandLineManager.getInstance().parse(args);
-            
+        
+        
+        
         if (commandLine.hasOption("help")) {
             CommandLineManager.getInstance().displayUsageAndHelp();
         } else if (commandLine.hasOption("version")) {
@@ -79,12 +120,19 @@ public final class ReplaceLinkApp {
             try {
                 appProperties = AppProperties.fromCommandLine(commandLine);
             } catch (IllegalArgumentException e) {
-                this.ps.println("Erreur : " + e.getMessage());
-                this.ps.println("Erreur : une erreur fatale a été détectée. Le programme va se terminer");
+                println("Erreur : " + e.getMessage());
+                println("Erreur : une erreur fatale a été détectée. Le programme va se terminer.");
+                CommandLineManager.getInstance().displayUsageAndHelp();
                 return;
             }
             
-            ps.println("coucou");
+            try {
+                new Processor().process(appProperties);
+            } catch (ProcessorException e) {
+                println("Erreur : " + e.getMessage());
+                println("Erreur : une erreur fatale a été détectée. Le programme va se terminer.");
+            }
         }
     }
+    
 }

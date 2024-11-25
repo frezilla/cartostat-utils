@@ -8,6 +8,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import static com.cartostatutils.replacelinkutils.ReplaceLinkApp.mainApp;
 
 
 public final class CommandLineManager {
@@ -22,13 +23,13 @@ public final class CommandLineManager {
     private CommandLineManager() {
         options = new Options();
         
-        Option help = new Option("help", "affiche le message d'aide");
+        Option help = new Option("help", "affiche ce message d'aide");
         Option version = new Option("version", "affiche la version de l'utilitaire");
-        Option verbose = new Option("verbose", "active le mode detaille");
-        Option srcDirectory = createOptionsWithArgument("srcdir", "dir", "chemin vers le repertoire à traiter");
-        Option codeFile = createOptionsWithArgument("codefile", "file", "chemin vers le fichiers des codes");
+        Option verbose = new Option("verbose", "active le mode detaillé");
+        Option srcDirectory = createOptionsWithArgument("srcdir", "dir", "chemin vers le repertoire des fichiers à traiter");
+        Option codeFile = createOptionsWithArgument("codefile", "file", "chemin vers le fichier des codes");
         Option outputDirectory = createOptionsWithArgument("outputdir", "dir", "chemin vers le repertoire de sortie");
-        Option charset = createOptionsWithArgument("charset", "name", "nom du jeu de caracteres");
+        Option charset = createOptionsWithArgument("charset", "name", "nom du jeu de caractères");
 
         options.addOption(help);
         options.addOption(version);
@@ -52,7 +53,16 @@ public final class CommandLineManager {
     
     public void displayUsageAndHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(ReplaceLinkApp.getApp().getName(), options);
+        formatter.printHelp(ReplaceLinkApp.mainApp().getName(), options);
+        formatter.printHelp(mainApp().getWriter(), 
+                120, 
+                "test", 
+                "", 
+                options, 
+                0, 
+                0, 
+                ""
+        );
     }
     
     public static CommandLineManager getInstance() {

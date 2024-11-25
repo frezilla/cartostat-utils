@@ -1,12 +1,12 @@
 package com.cartostatutils.replacelinkutils.properties;
 
-import static com.cartostatutils.replacelinkutils.ReplaceLinkApp.getApp;
 import static com.cartostatutils.replacelinkutils.properties.ConvertUtils.convertDirectoryToPath;
 import static com.cartostatutils.replacelinkutils.properties.ConvertUtils.convertFileToPath;
 import java.nio.file.Path;
 import lombok.Getter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.StringUtils;
+import static com.cartostatutils.replacelinkutils.ReplaceLinkApp.mainApp;
 
 @Getter
 public final class AppProperties {
@@ -34,10 +34,9 @@ public final class AppProperties {
     
     private void setCharset(String charset) {
         if (StringUtils.trimToNull(charset) == null) {
-            if (getApp().isVerbose()) {
-                getApp().getPs().println("Le jeu de caractères n'est pas spécifié; le jeu de caractères par défaut sera utilisé");
-            }
-            this.charset = getApp().getDefaultCharset();
+            String defaultCharset = mainApp().getDefaultCharset();
+            mainApp().printlnVerbose("Le jeu de caractères n'est pas spécifié; le jeu de caractères par défaut (" + defaultCharset + ") sera utilisé");
+            this.charset = defaultCharset;
         } else {
             this.charset = charset;
         }
@@ -55,9 +54,7 @@ public final class AppProperties {
     private void setOutputDirectory(String outputDirectory) {
         try {
             if (StringUtils.trimToNull(outputDirectory) == null) {
-                if (getApp().isVerbose()) {
-                    getApp().getPs().println("Le chemin du répertoire de destination n'est pas renseigné; le répertoire source sera utilisé comme répertoire de destination");
-                }
+                mainApp().printlnVerbose("Le chemin du répertoire de destination n'est pas renseigné; le répertoire source sera utilisé comme répertoire de destination");
                 this.outputDirectory = this.srcDirectory;
             } else {
                 this.outputDirectory = convertDirectoryToPath(outputDirectory);
