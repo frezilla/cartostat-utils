@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import static com.cartostatutils.replacelinkutils.ReplaceLinkApp.mainApp;
 import java.nio.file.Files;
+import java.util.Objects;
 
 public final class Processor {
     
@@ -25,19 +26,19 @@ public final class Processor {
     private static final String EXTENSION = "SVG";
 
     private Iterator<Pair<Integer, String>> computeProgressSteps(int maxValue, int nbSteps) {
-        DecimalFormat df = new DecimalFormat("# %%");
+        DecimalFormat df = new DecimalFormat("#");
         List<Pair<Integer, String>> steps = new ArrayList<>();
 
         int finalNbSteps = Math.min(maxValue, nbSteps);
-        int stepVal = (int) (maxValue / finalNbSteps);
+        double stepVal = ((double) maxValue / (double) finalNbSteps);
 
-        int currentVal = 0;
+        double currentVal = 0;
         while (currentVal < maxValue) {
             double percentage = 100.0 * currentVal / maxValue;
             steps.add(
                     Pair.of(
-                            currentVal,
-                            df.format(percentage)
+                            (int) currentVal,
+                            df.format(percentage) + "%"
                     )
             );
             currentVal += stepVal;
@@ -46,7 +47,7 @@ public final class Processor {
         steps.add(
                 Pair.of(
                         maxValue,
-                        df.format(100.0)
+                        df.format(100.0) + "%"
                 )
         );
 
@@ -65,7 +66,7 @@ public final class Processor {
                 }
             }
         } catch (IOException e) {
-            throw new ProcessorException("Erreur à la lecture du fichier", e);
+            throw new ProcessorException("Erreur de lecture du fichier", e);
         }
 
         return map;
@@ -82,7 +83,7 @@ public final class Processor {
             mainApp().printlnVerbose("ok");
         }
 
-        mainApp().printVerbose("Sélection des fichiers à traiter...");
+        mainApp().printVerbose("Selection des fichiers à traiter...");
         File[] files = properties.getSrcDirectory().toFile().listFiles((pathname) -> {
             return StringUtils.equalsIgnoreCase(
                     FilenameUtils.getExtension(pathname.getName()),
@@ -94,7 +95,7 @@ public final class Processor {
         int nbFiles = files.length;
 
         if (nbFiles == 0) {
-            mainApp().println("Aucun fichier sélectionné");
+            mainApp().println("Aucun fichier selectionne");
         } else {
             String charset = properties.getCharset();
             Path ouputDirectory = properties.getOutputDirectory();
@@ -106,6 +107,7 @@ public final class Processor {
             boolean error = false;
 
             mainApp().println("Traitement en cours...");
+            mainApp().print(progressMsg.toString());
 
             int indexFile = 0;
             while (indexFile < nbFiles) {
@@ -117,12 +119,12 @@ public final class Processor {
                     try {
                         replaceValue(currentFile, codeMap.get(titleValue), ouputDirectory, charset);
                     } catch (ProcessorException e) {
-                        mainApp().println("Une erreur technique est survenue pendant le traitement du fichier " + currentFile.getName());
+                        mainApp().println("\nUne erreur technique est survenue pendant le traitement du fichier " + currentFile.getName());
                         mainApp().printVerbose(e.getMessage());
                         error = true;
                     }
                 } else {
-                    mainApp().println("Le fichier " + currentFile.getAbsolutePath() + " n'a pas de valeur renseignée; il ne sera pas traité.");
+                    mainApp().println("\nLe fichier " + currentFile.getAbsolutePath() + " n'a pas de valeur renseignee; il ne sera pas traite.");
                     error = true;
                 }
 
@@ -141,20 +143,24 @@ public final class Processor {
                 }
             }
 
-            if (error) {
-                mainApp().println(progressMsg.append("...").append(currentStep.getRight()).toString());
+            if (!Objects.equals(currentStep.getLeft(), nbFiles)) {
+                if (error) {
+                    mainApp().println(progressMsg.append("...").append(currentStep.getRight()).toString());
+                } else {
+                    mainApp().println("..." + currentStep.getRight());
+                }
             } else {
-                mainApp().println("..." + currentStep.getRight());
+                mainApp().println("");
             }
 
-            mainApp().print("Traitement terminé");
+            mainApp().println("Traitement termine");
         }
     }
 
     private void replaceValue(File file, String codeValue, Path outputDirectory, String charset) throws ProcessorException {
         try {
             Path srcPath = file.toPath();
-            Path outPath = new File(outputDirectory.toString() + file.getName()).toPath();
+            Path outPath = new File(outputDirectory.toString() + File.separator + file.getName()).toPath();
 
             String content = new String(Files.readAllBytes(srcPath), charset);
             content = content.replaceAll(RMPLCR, codeValue);

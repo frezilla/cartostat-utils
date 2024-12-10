@@ -35,7 +35,7 @@ public final class AppProperties {
     private void setCharset(String charset) {
         if (StringUtils.trimToNull(charset) == null) {
             String defaultCharset = mainApp().getDefaultCharset();
-            mainApp().printlnVerbose("Le jeu de caractères n'est pas spécifié; le jeu de caractères par défaut (" + defaultCharset + ") sera utilisé");
+            mainApp().printlnVerbose("Le jeu de caracteres n'est pas specifie; le jeu de caracteres par defaut (" + defaultCharset + ") sera utilise");
             this.charset = defaultCharset;
         } else {
             this.charset = charset;
@@ -54,7 +54,7 @@ public final class AppProperties {
     private void setOutputDirectory(String outputDirectory) {
         try {
             if (StringUtils.trimToNull(outputDirectory) == null) {
-                mainApp().printlnVerbose("Le chemin du répertoire de destination n'est pas renseigné; le répertoire source sera utilisé comme répertoire de destination");
+                mainApp().printlnVerbose("Le chemin du repertoire de destination n'est pas renseigne; le repertoire source sera utilise comme repertoire de destination");
                 this.outputDirectory = this.srcDirectory;
             } else {
                 this.outputDirectory = convertDirectoryToPath(outputDirectory);
@@ -68,7 +68,7 @@ public final class AppProperties {
         try {
             this.srcDirectory = convertDirectoryToPath(srcDirectory);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Le chemin du répertoire source n'est pas valide");
+            throw new IllegalArgumentException("Le chemin du repertoire source n'est pas valide");
         }
     }
     
