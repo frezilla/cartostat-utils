@@ -4,10 +4,8 @@ import com.cartostatutils.replacelinkutils.commandline.CommandLineManager;
 import com.cartostatutils.replacelinkutils.processor.Processor;
 import com.cartostatutils.replacelinkutils.processor.ProcessorException;
 import com.cartostatutils.replacelinkutils.properties.AppProperties;
-import java.io.Console;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Properties;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,7 +30,6 @@ public final class ReplaceLinkApp {
         }
     }
     
-    @Getter(AccessLevel.NONE) private final Console console;
     private final String defaultCharset;
     private final String description;
     private final String name;
@@ -44,7 +41,6 @@ public final class ReplaceLinkApp {
         Properties properties = new Properties();
         properties.load(this.getClass().getClassLoader().getResourceAsStream("app.properties"));
         
-        console = System.console();
         defaultCharset = properties.getProperty("app.defaultCharset");
         description = properties.getProperty("app.description");
         name = properties.getProperty("app.name");
@@ -53,24 +49,28 @@ public final class ReplaceLinkApp {
         version = properties.getProperty("app.version");
     }
     
+    /**
+     * Affiche les informations relative à la version de l'utilitaire.
+     */
     public void displayVersion() {
-        ps.println(String.format("%s \"%s\"", name, version));
-        ps.println(String.format("%10s", description));
-        ps.println(String.format("%10s : %s", "registre des caractères par défaut", defaultCharset));
+        println(String.format("\n%s \"%s\"", name, version));
+        println(String.format("%10s", description));
+        println(String.format("%10s : %s", "Jeux de caracteres par defaut", defaultCharset));
     }
     
+    /**
+     * Retourne l'instance unique de l'application
+     * @return instance
+     */
     public static ReplaceLinkApp mainApp() {
         return Holder.INSTANCE;
     }
     
-    public PrintWriter getWriter() {
-        if (console == null) {
-            return new PrintWriter(ps);
-        } else {
-            return console.writer();
-        }
-    }
-    
+    /**
+     * Méthode principale
+     * @param args
+     * @throws InterruptedException 
+     */
     public static void main(String[] args) throws InterruptedException {
         try {
             ReplaceLinkApp.mainApp().run(args);
@@ -79,33 +79,48 @@ public final class ReplaceLinkApp {
         }
     }
     
+    /**
+     * Affiche une chaine de caractères vers le flux de sortie
+     * @param s 
+     */
     public void print(String s) {
-        String string = StringUtils.defaultString(s);
-        
-        if (console == null) {
-            ps.print(string);
-        } else {
-            console.writer().write(string);
-        }
+        ps.print(StringUtils.defaultString(s));
     }
     
+    /**
+     * Affiche une chaine de caractères vers le flux de sortie et retourne à la 
+     * ligne
+     * @param s 
+     */    
     public void println(String s) {
-        print(StringUtils.defaultString(s) + StringUtils.CR);
+        ps.println(StringUtils.defaultString(s));
     }
     
+    /**
+     * Affiche une chaine de caractères vers le flux de sortie si le mode 
+     * verbeux est activé
+     * @param s 
+     */
     public void printVerbose(String s) {
         if (isVerbose()) print(s);
     }
-    
+
+    /**
+     * Affiche une chaine de caractères vers le flux de sortie si le mode 
+     * verbeux est activé et retourne à la ligne
+     * @param s 
+     */    
     public void printlnVerbose(String s) {
         if (isVerbose()) println(s);
     }
     
-    
+    /**
+     * Orchestre l'exécution de l'utilitaire
+     * @param args
+     * @throws ParseException 
+     */
     public void run(String[] args) throws ParseException {
         CommandLine commandLine = CommandLineManager.getInstance().parse(args);
-        
-        
         
         if (commandLine.hasOption("help")) {
             CommandLineManager.getInstance().displayUsageAndHelp();
@@ -121,8 +136,8 @@ public final class ReplaceLinkApp {
                 appProperties = AppProperties.fromCommandLine(commandLine);
             } catch (IllegalArgumentException e) {
                 println("Erreur : " + e.getMessage());
-                println("Erreur : une erreur fatale a été détectée. Le programme va se terminer.");
-                CommandLineManager.getInstance().displayUsageAndHelp();
+                println("Erreur : une erreur fatale a ete detectee. Le programme va se terminer.\n");
+                CommandLineManager.getInstance().displayUsageAndHelp();    
                 return;
             }
             
@@ -130,7 +145,8 @@ public final class ReplaceLinkApp {
                 new Processor().process(appProperties);
             } catch (ProcessorException e) {
                 println("Erreur : " + e.getMessage());
-                println("Erreur : une erreur fatale a été détectée. Le programme va se terminer.");
+                println("Erreur : une erreur fatale a ete detectee. Le programme va se terminer.\n");
+                CommandLineManager.getInstance().displayUsageAndHelp();
             }
         }
     }

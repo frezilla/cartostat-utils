@@ -1,6 +1,5 @@
 package com.cartostatutils.replacelinkutils.commandline;
 
-import com.cartostatutils.replacelinkutils.ReplaceLinkApp;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -10,7 +9,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import static com.cartostatutils.replacelinkutils.ReplaceLinkApp.mainApp;
 
-
+/**
+ * Gère les valeurs passées en ligne de commande
+ */
 public final class CommandLineManager {
     
     private static final class Holder {
@@ -25,11 +26,11 @@ public final class CommandLineManager {
         
         Option help = new Option("help", "affiche ce message d'aide");
         Option version = new Option("version", "affiche la version de l'utilitaire");
-        Option verbose = new Option("verbose", "active le mode detaillé");
+        Option verbose = new Option("verbose", "active le mode verbeux");
         Option srcDirectory = createOptionsWithArgument("srcdir", "dir", "chemin vers le repertoire des fichiers à traiter");
         Option codeFile = createOptionsWithArgument("codefile", "file", "chemin vers le fichier des codes");
         Option outputDirectory = createOptionsWithArgument("outputdir", "dir", "chemin vers le repertoire de sortie");
-        Option charset = createOptionsWithArgument("charset", "name", "nom du jeu de caractères");
+        Option charset = createOptionsWithArgument("charset", "name", "nom du jeu de caracteres");
 
         options.addOption(help);
         options.addOption(version);
@@ -51,24 +52,34 @@ public final class CommandLineManager {
                 .build();
     }
     
+    /**
+     * Affiche l'usage et l'aide.
+     */
     public void displayUsageAndHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(ReplaceLinkApp.mainApp().getName(), options);
-        formatter.printHelp(mainApp().getWriter(), 
-                120, 
-                "test", 
-                "", 
+        formatter.printHelp(
+                240, 
+                "ReplaceLink -srcdir <dir> -codefile <file>\n\n", 
+                mainApp().getDescription() + "\n\n", 
                 options, 
-                0, 
-                0, 
-                ""
+                "\nversion : " + mainApp().getVersion()
         );
     }
     
+    /**
+     * Retourne l'instance unique du manager.
+     * @return instance
+     */
     public static CommandLineManager getInstance() {
         return Holder.INSTANCE;
     }
     
+    /**
+     * Parse les arguments passés en paramètre.
+     * @param args
+     * @return
+     * @throws ParseException 
+     */
     public CommandLine parse(String[] args) throws ParseException {
         return parser.parse(options, args);
     }
